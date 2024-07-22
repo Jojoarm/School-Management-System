@@ -5,6 +5,7 @@ const {
   globalErrHandler,
   notFoundErr,
 } = require('../middlewares/globalErrorHandler');
+const academicYearRouter = require('../routes/academics/academicYearRouter');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 //Admin register
 app.use('/api/v1/admins', adminRouter);
+app.use('/api/v1/academic-years', academicYearRouter);
 
 //Error middlewares
 app.use(notFoundErr);
