@@ -11,7 +11,8 @@ const {
 
 const examRouter = express.Router();
 
-examRouter.route('/', isTeacherLogin, isTeacher).post(createExam).get(getExams);
+examRouter.get('/', isTeacherLogin, isTeacher, getExams);
+examRouter.post('/:teacherId', isTeacherLogin, isTeacher, createExam);
 
 examRouter
   .route('/:id')

@@ -3,7 +3,7 @@ const Teacher = require('../../model/Staff/Teacher');
 const Exam = require('../../model/Academic/Exam');
 
 //@desc Create Exam
-//@route POST /api/v1/exams
+//@route POST /api/v1/exams/:teacherID
 //@acess Private Teachers only
 exports.createExam = AsyncHandler(async (req, res) => {
   const {
@@ -21,8 +21,10 @@ exports.createExam = AsyncHandler(async (req, res) => {
     academicYear,
   } = req.body;
 
+  console.log(req);
   //Find teacher
-  const teacherFound = await Teacher.findById(req.userAuth?._id);
+  const teacherFound = await Teacher.findById(req.params.teacherId);
+
   if (!teacherFound) {
     throw new Error('Teacher not found');
   }
@@ -67,7 +69,12 @@ exports.createExam = AsyncHandler(async (req, res) => {
 //@route GET /api/v1/exams
 //@acess Private
 exports.getExams = AsyncHandler(async (req, res) => {
-  const exams = await Exam.find();
+  const exams = await Exam.find().populate({
+    path: 'questions',
+    populate: {
+      path: 'createdBy',
+    },
+  });
   res.status(200).json({
     status: 'Success',
     message: 'Exams fetched successfully',

@@ -30,7 +30,7 @@ const questionSchema = new mongoose.Schema(
       default: false,
     },
     createdBy: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Teacher',
       required: true,
     },
