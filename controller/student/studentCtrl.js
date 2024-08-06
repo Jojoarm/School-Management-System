@@ -4,12 +4,19 @@ const { hashPassword, verifyPassword } = require('../../utils/helpers');
 const generateToken = require('../../utils/generateToken');
 const Exam = require('../../model/Academic/Exam');
 const ExamResult = require('../../model/Academic/ExamResults');
+const Admin = require('../../model/Staff/Admin');
 
 //@desc Admin register teacher
 //@route POST /api/v1/students/admin/register
 //@acess Private Admin only
 exports.adminRegisterStudent = AsyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
+
+  //find the admin
+  const adminFound = await Admin.findById(req.userAuth._id);
+  if (!adminFound) {
+    throw new Erorr('Admin not found');
+  }
 
   //check if student already exist
   const student = await Student.findOne({ email });
@@ -26,6 +33,10 @@ exports.adminRegisterStudent = AsyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
   });
+
+  //push the student into admin
+  adminFound.students.push(studentCreated?.id);
+  await adminFound.save();
 
   //send student data
   res.status(201).json({
@@ -63,16 +74,37 @@ exports.loginStudent = AsyncHandler(async (req, res) => {
 //@route Get /api/v1/students/profile
 //@acess Private student only
 exports.getStudentProfile = AsyncHandler(async (req, res) => {
-  const student = await Student.findById(req.userAuth._id).select(
-    '-password -createdAt -updatedAt'
-  );
+  const student = await Student.findById(req.userAuth._id)
+    .select('-password -createdAt -updatedAt')
+    .populate('examResults');
   if (!student) {
     throw new Error('Student not found');
   }
+  //get student profile
+  const studentProfile = {
+    name: student?.name,
+    email: student?.email,
+    currrentClassLevel: student?.currentClassLevel,
+    program: student?.program,
+    dateAdmitted: student?.dateAdmitted,
+    isSuspended: student?.isSuspended,
+    isWithdrawn: student?.isWithdrawn,
+    studentId: student?.studentId,
+    prefectName: student?.prefectName,
+  };
+  //get student exam result
+  const examResults = student?.examResults;
+  const currentExamResult = examResults[examResults.length - 1];
+  //check if exam is published
+  const isPublished = currentExamResult?.isPublished;
+
   res.status(200).json({
     status: 'success',
     message: 'Student fetched successfully',
-    data: student,
+    data: {
+      studentProfile,
+      currentExamResult: isPublished ? currentExamResult : [],
+    },
   });
 });
 
@@ -300,7 +332,7 @@ exports.writeExam = AsyncHandler(async (req, res) => {
 
   //Generate exam result
   const examResults = await ExamResult.create({
-    student: studentFound?._id,
+    studentID: studentFound?.studentId,
     exam: examFound?._id,
     grade,
     score,
@@ -309,6 +341,7 @@ exports.writeExam = AsyncHandler(async (req, res) => {
     classLevel: examFound?.classLevel,
     academicTerm: examFound?.academicTerm,
     academicYear: examFound?.academicYear,
+    answeredQuestions: answeredQuestions,
   });
 
   // //push results into student

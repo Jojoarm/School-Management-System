@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const examResultSchema = new mongoose.Schema(
   {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
+    studentID: {
+      type: String,
       required: true,
     },
     exam: {
@@ -24,6 +23,11 @@ const examResultSchema = new mongoose.Schema(
       required: true,
       default: 50,
     },
+    answeredQuestions: [
+      {
+        type: Object,
+      },
+    ],
     //failed/passed
     status: {
       type: String,

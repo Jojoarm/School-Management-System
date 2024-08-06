@@ -2,12 +2,19 @@ const AsyncHandler = require('express-async-handler');
 const Teacher = require('../../model/Staff/Teacher');
 const { hashPassword, verifyPassword } = require('../../utils/helpers');
 const generateToken = require('../../utils/generateToken');
+const Admin = require('../../model/Staff/Admin');
 
 //@desc Admin register teacher
 //@route POST /api/v1/teachers/admin/register
 //@acess Private
 exports.adminRegisterTeacher = AsyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
+
+  //find the admin
+  const adminFound = await Admin.findById(req.userAuth._id);
+  if (!adminFound) {
+    throw new Erorr('Admin not found');
+  }
 
   //check if teacher already exist
   const teacher = await Teacher.findOne({ email });
@@ -24,6 +31,9 @@ exports.adminRegisterTeacher = AsyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
   });
+
+  adminFound.teachers.push(teacherCreated?.id);
+  await adminFound.save();
 
   //send teacher data
   res.status(201).json({
