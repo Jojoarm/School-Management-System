@@ -13,8 +13,11 @@ const {
   adminPublishResultsCtrl,
   adminUnpublishResultsCtrl,
 } = require('../../controller/staff/adminController');
-const isLogin = require('../../middlewares/isLogin');
 const isAdmin = require('../../middlewares/isAdmin');
+const advancedResults = require('../../middlewares/advancedResults');
+const Admin = require('../../model/Staff/Admin');
+const isAuth = require('../../middlewares/isAuth');
+const roleRestriction = require('../../middlewares/roleRestriction');
 
 const adminRouter = express.Router();
 
@@ -25,33 +28,74 @@ adminRouter.post('/register', registerAdminCtrl);
 adminRouter.post('/login', loginAdminCtrl);
 
 //get all admins
-adminRouter.get('/', isLogin, isAdmin, getAdminsCtrl);
+adminRouter.get(
+  '/',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  advancedResults(Admin),
+  getAdminsCtrl
+);
 
 //get an admin
-adminRouter.get('/profile', isLogin, isAdmin, getAdminProfileCtrl);
+adminRouter.get(
+  '/profile',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  getAdminProfileCtrl
+);
 
 //update admin
-adminRouter.put('/', isLogin, isAdmin, updateAdminCtrl);
+adminRouter.put('/', isAuth(Admin), roleRestriction('admin'), updateAdminCtrl);
 
 //delete admin
 adminRouter.delete('/:id', deleteAdminCtrl);
 
 //suspend teacher
-adminRouter.put('/suspend/teacher/:id', adminSuspendTeacherCtrl);
+adminRouter.put(
+  '/suspend/teacher/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminSuspendTeacherCtrl
+);
 
 //unsuspend teacher
-adminRouter.put('/unsuspend/teacher/:id', adminUnsuspendTeacherCtrl);
+adminRouter.put(
+  '/unsuspend/teacher/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminUnsuspendTeacherCtrl
+);
 
 //withdraw teacher
-adminRouter.put('/withdraw/teacher/:id', adminWithdrawTeacherCtrl);
+adminRouter.put(
+  '/withdraw/teacher/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminWithdrawTeacherCtrl
+);
 
 //unwithdraw teacher
-adminRouter.put('/unwithdraw/teacher/:id', adminUnwithdrawTeacherCtrl);
+adminRouter.put(
+  '/unwithdraw/teacher/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminUnwithdrawTeacherCtrl
+);
 
 //publish a result
-adminRouter.put('/publish/exam/:id', adminPublishResultsCtrl);
+adminRouter.put(
+  '/publish/exam/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminPublishResultsCtrl
+);
 
 //unpublish a result
-adminRouter.put('/unpublish/exam/:id', adminUnpublishResultsCtrl);
+adminRouter.put(
+  '/unpublish/exam/:id',
+  isAuth(Admin),
+  roleRestriction('admin'),
+  adminUnpublishResultsCtrl
+);
 
 module.exports = adminRouter;

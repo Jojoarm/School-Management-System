@@ -71,12 +71,7 @@ exports.loginTeacher = AsyncHandler(async (req, res) => {
 //@route POST /api/v1/teachers/admin/
 //@acess Private admin only
 exports.getAllTeachersAdmin = AsyncHandler(async (req, res) => {
-  const teachers = await Teacher.find();
-  res.status(200).json({
-    status: 'success',
-    message: 'Teachers fetched successfully',
-    data: teachers,
-  });
+  res.status(200).json(res.results);
 });
 
 //@desc Get single teacher
